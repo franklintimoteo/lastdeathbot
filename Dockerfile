@@ -5,11 +5,10 @@ WORKDIR /lasdeath
 # Instalando os pacotes necessários, incluindo cron, openssh-client, rsync, sqlite3, e as ferramentas Python
 RUN apt-get update && \
     apt-get install -y cron openssh-client python3-pip python3.11-venv python3 rsync sqlite3 && \
-    python3 -m pip install --upgrade pip && \
     rm -rf /var/lib/apt/lists/*
 
 # cria o ambiente virtual python
-RUN python3 -m venv env
+RUN python3 -m venv /lastdeath/env
 
 # ativa o ambiente virtual env
 ENV PATH="/lastdeath/env/bin:$PATH"
