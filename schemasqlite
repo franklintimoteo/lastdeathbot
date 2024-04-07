@@ -1,0 +1,50 @@
+CREATE TABLE sqlite_sequence(name,seq);
+CREATE TABLE IF NOT EXISTS "Monster" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS "Player" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL
+, "outfit" TEXT);
+CREATE TABLE IF NOT EXISTS "Death" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "player" INTEGER NOT NULL REFERENCES "Player" ("id") ON DELETE CASCADE,
+  "level" INTEGER,
+  "time" DATETIME
+, "sent" BOOLEAN);
+CREATE INDEX "idx_death__player" ON "Death" ("player");
+CREATE TABLE IF NOT EXISTS "Death_Monster" (
+  "death" INTEGER NOT NULL REFERENCES "Death" ("id") ON DELETE CASCADE,
+  "monster" INTEGER NOT NULL REFERENCES "Monster" ("id") ON DELETE CASCADE,
+  PRIMARY KEY ("death", "monster")
+);
+CREATE INDEX "idx_death_monster" ON "Death_Monster" ("monster");
+CREATE TABLE IF NOT EXISTS "Experience" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "date" DATETIME,
+  "amount" INTEGER,
+  "player" INTEGER NOT NULL REFERENCES "Player" ("id") ON DELETE CASCADE,
+  "level" INTEGER
+);
+CREATE INDEX "idx_experience__player" ON "Experience" ("player");
+CREATE TABLE IF NOT EXISTS "BoostedCreature" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "date" DATE,
+  "isBoss" BOOLEAN,
+  CONSTRAINT boosted_unique UNIQUE (name, date)
+);
+CREATE TABLE IF NOT EXISTS "Achievement" (
+  "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "points" INTEGER,
+  "description" TEXT NOT NULL,
+  "link" TEXT NULL
+);
+CREATE TABLE IF NOT EXISTS "Achievement_Player" (
+  "achievement" INTEGER NOT NULL REFERENCES "Achievement" ("id"),
+  "player" INTEGER NOT NULL REFERENCES "Player" ("id"),
+  PRIMARY KEY ("achievement", "player")
+);
+CREATE INDEX "idx_achievement_player" ON "Achievement_Player" ("player");

@@ -32,7 +32,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # configura os volumes
 #  - ssh: chave ssh para sincronizar o banco de dados e arquivos dos bosses
 #  - database: vincula o database presente do host para dentro do container
-VOLUME ["/DATA/configs/lastdeathbot/ssh:/root/.ssh", "/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite"]
+VOLUME ["/DATA/configs/lastdeathbot/ssh:/root/.ssh", "/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite", "/DATA/configs/lastdeathbot/.env:/lastdeath/.env"]
 
 # explicita qual arquivo inicializar após o container subir
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
