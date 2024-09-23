@@ -2,6 +2,9 @@
 FROM debian:latest
 WORKDIR /lastdeath
 
+# Altera o timezone
+ENV TZ="America/Sao_Paulo"
+
 # Instalando os pacotes necessários, incluindo cron, openssh-client, rsync, sqlite3, e as ferramentas Python
 RUN apt-get update && \
     apt-get install -y cron openssh-client python3-pip python3.11-venv python3 rsync sqlite3 && \
@@ -22,6 +25,12 @@ RUN pip install -r requirements.txt
 # copia os arquivos locais para o workdir
 COPY . /lastdeath
 
+COPY cron /etc/cron.d/lastdeath-cron
+RUN ln -snf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+
+RUN chmod 0644 /etc/cron.d/lastdeath-cron && \
+    crontab /etc/cron.d/lastdeath-cron
+ 
 # copia o entrypoint para o diretório ideal.
 # o entry point é apenas para garantir que o crontab inicialize sempre
 # e após isso execute o bot
@@ -36,7 +45,7 @@ RUN mkdir /root/.ssh
 #  - database: vincula o database presente do host para dentro do container
 #  - .env: variaveis secretas de ambiente
 #  - ssh_config: vincula o arquivo de ssh_config para não vazar os dados da vps que hospeda o site
-VOLUME ["/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite", "/DATA/configs/lastdeathbot/.env:/lastdeath/.env", "/DATA/configs/lastdeathbot/ssh_config:/root/.ssh/config"]
+VOLUME ["/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite", "/DATA/configs/lastdeathbot/.env:/lastdeath/.env", "/DATA/configs/lastdeathbot/ssh_config:/root/.ssh/config", "/DATA/configs/lastdeathbot/ovh_remote:/root/.ssh/ovh_remote"]
 
 # explicita qual arquivo inicializar após o container subir
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
