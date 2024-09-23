@@ -62,7 +62,7 @@ for member in members_guild:
         soup_level = soup_level.find(class_="table table-striped table-condensed")
         level = soup_level.find(string="Level: ")
         level = level.find_next('td').text
-        level = int(level)
+        level = int(level.replace(".",""))
 
         # obtem os achievements do jogador
         soup_achiev = BeautifulSoup(r.content, "lxml")
@@ -94,7 +94,7 @@ for member in members_guild:
         if experience.text.startswith("No experience"):
             experience = 0
         else:
-            experience = int(experience.text.replace(',', ''))
+            experience = int(experience.text.replace('.', ''))
 
         
         # salva no banco de dados
