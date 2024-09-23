@@ -59,7 +59,7 @@ page_deaths = requests.get(URL, headers=HEADERS)
 soup = BeautifulSoup(page_deaths.content, "html.parser")
 table_deaths = soup.find(id="deathsTable")
 
-REGX_LEVEL = re.compile("[0-9]+")
+REGX_LEVEL = re.compile("[0-9.]+")
 REGX_DIEDFOR = re.compile(r"by[\w '-]+")
 REGX_SPLIT = re.compile(r" and a[n]? ")
 
@@ -69,7 +69,7 @@ for deaths in table_deaths.find_all("tr")[1:]:
   name = name.text
   desc = desc.text
   # filtra apenas o nome, monstro, e data
-  level = REGX_LEVEL.search(desc).group() # obtem o grupo encontrado, nesse caso o level numérico 
+  level = REGX_LEVEL.search(desc).group().replace(".","") # obtem o grupo encontrado, nesse caso o level numérico 
   died_for_monsters = REGX_DIEDFOR.search(desc).group().removeprefix("by an ").removeprefix("by a ").removeprefix("by ")
   died_for_monsters = REGX_SPLIT.split(died_for_monsters)
   
@@ -80,40 +80,3 @@ for deaths in table_deaths.find_all("tr")[1:]:
   logger.debug('time atual: %s | time death: %s' %(time.time(), timedeath))
   Death.insert(name, level, timedeath, died_for_monsters)
 
-# logger.debug("Level minimo configurado: %s" %MIN_LEVEL)
-
-# =========================================================
-
-# import sys
-# import configparser
-# import discord
-# from discord import AllowedMentions
-
-# def send_message_discord(message):
-#     load_dotenv()
-#     token = getenv('DISCORDTOKEN')
-#     intents = discord.Intents.default()
-#     intents.message_content = True
-
-#     client = discord.Client(intents=intents)
-#     @client.event
-#     async def on_ready():
-#         for guilds in GUILDSCHANNELS:
-#             guilda_id, channel = guilds.split(',')
-#             guilda_id, channel = int(guilda_id), int(channel) 
-#             almention = AllowedMentions(everyone=True, users=True, roles=True, replied_user=True)
-#             channel = client.get_channel(channel)
-#             result = await channel.send(message, allowed_mentions=almention)
-#         await client.close()
-
-#     client.run(token)
-    
-
-
-# =========================================================
-
-
-# if last_deaths_list:
-#     role_verificado = 1053348306358632478
-#     send_message_discord(f"```{FMT}```")
-#     #send_message_discord(f"```{FMT}```\n<@&{role_verificado}>")
