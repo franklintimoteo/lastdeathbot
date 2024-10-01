@@ -259,3 +259,13 @@ def ban_confirm_sent(bans_ids):
     result = db.execute(f"update Players_Banned set sent=True where id in {bans_ids}")
 
     return result
+
+
+@db_session
+def get_last_bans(delta, level):
+    "Obtem os últimos bans"
+    delta = datetime.now() - delta
+
+    result = db.select("select Players_Banned.id, Player.name, level, timeban from Players_Banned inner join Player on Players_Banned.player = player.id where timeban >= $delta and level >= $level and sent is null group by Player,timeban")
+
+    return result
