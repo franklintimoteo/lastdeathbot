@@ -48,3 +48,12 @@ CREATE TABLE IF NOT EXISTS "Achievement_Player" (
   PRIMARY KEY ("achievement", "player")
 );
 CREATE INDEX "idx_achievement_player" ON "Achievement_Player" ("player");
+CREATE TABLE IF NOT EXISTS "Players_Banned" (
+ "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+ "player" INTEGER NOT NULL REFERENCES "Player" ("id") ON DELETE CASCADE,
+ "timeban" DATETIME,
+ "level" INTEGER,
+ "sent" BOOLEAN,
+ UNIQUE(player, timeban, level) ON CONFLICT REPLACE
+ );
+CREATE INDEX "idx_players_banned" ON "Players_Banned" ("player");
