@@ -242,3 +242,20 @@ def update_outfit_url(player, url):
     player = Player.create_get_player(player).id
     db.execute("UPDATE PLAYER SET outfit = $url WHERE id = $player;")
 
+
+@db_session
+def insert_banned(player, level, timeban):
+    player = Player.create_get_player(player).id
+    db.execute("INSERT OR IGNORE INTO Players_Banned(Player, Level, Timeban) VALUES ($player, $level, $timeban);")
+
+
+@db_session
+def ban_confirm_sent(bans_ids):
+    "bans_id: [int]"
+    bans_ids = tuple(bans_ids)
+    if len(bans_ids) == 1:
+        bans_ids = f'({bans_ids[0]})'
+
+    result = db.execute(f"update Players_Banned set sent=True where id in {bans_ids}")
+
+    return result
