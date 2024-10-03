@@ -35,7 +35,6 @@ URL = "https://san.taleon.online/banned.php"
 page_bans = requests.get(URL, headers=HEADERS)
 
 REGX_LEVEL = re.compile("[0-9.]+")
-"🚫"
 
 soup = BeautifulSoup(page_bans.content, "html.parser")
 table_bans = soup.find(id="achivTable")

@@ -9,7 +9,7 @@ import time
 from io import BytesIO
 from dotenv import load_dotenv
 from tabulate import tabulate
-from models import db, get_last_dead, rank_exp_guild, rank_exp_month, confirm_sent
+from models import db, get_last_dead, rank_exp_guild, rank_exp_month, confirm_sent, get_last_bans, ban_confirm_sent
 from models import max_level_died, top_10_dead_players, top_10_dead_players_guild, monster_most_kill
 
 from discord.ext import tasks, commands
@@ -31,7 +31,10 @@ GUILDSCHANNELS = getenv('GUILDSCHANNELS').split(';')
 TOKEN = getenv('DISCORDTOKEN')
 INTERVAL_SEARCH_DEAD = 30  # SECONDS
 INTERVAL_LAST_DEATH = 240
+INTERVAL_SEARCH_BANS = 300
+INTERVAL_BANS = 600
 MIN_LEVEL = 850
+MIN_LEVEL_BANS = 1
 
 
 def convert_date(value):
@@ -54,9 +57,11 @@ class DeathCog(commands.Cog):
         self.bot = bot
         self.index = 0
         self.printer.start()
+        self.searchs_bans.start()
 
     def cog_unload(self):
         self.printer.cancel()
+        self.searchs_bans.cancel()
 
     @tasks.loop(seconds=INTERVAL_SEARCH_DEAD)
     async def printer(self):
@@ -81,6 +86,29 @@ class DeathCog(commands.Cog):
             finally:
                 deathsid = (id for id, *_ in result)
                 confirm_sent(deathsid)
+
+    @tasks.loop(seconds=INTERVAL_SEARCH_BANS)
+    async def searchs_bans(self):
+        # busca os últimos bans
+        delta = timedelta(seconds=INTERVAL_BANS)
+        result = get_last_bans(delta, MIN_LEVEL_BANS)
+        msg = ""
+        logger.debug("last bans: %s" %result)
+        for _, name, level, _ in result:
+            msg += f'🚫 [{level}] {name} foi banido!\n'
+
+        if msg:
+            msg = f'```{msg}```'
+            try:
+                for channel in GUILDSCHANNELS:
+                    channel = int(channel)
+                    channel = self.bot.get_channel(channel)
+                    await channel.send(content=msg)
+            except Exception:
+                pass
+            finally:
+                bansid = (id for id, *_ in result)
+                ban_confirm_sent(bansid)
 
 
     @commands.command(name='weekexp')
