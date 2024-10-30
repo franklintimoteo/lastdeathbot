@@ -1,3 +1,4 @@
 10 0 * * * /lastdeath/dailyexperience.py
 30 0 * * * /lastdeath/db-rsync.sh
 */1 * * * * /lastdeath/lastdeathbot.py
+*/4 * * * * /lastdeath/lastbanned.py
