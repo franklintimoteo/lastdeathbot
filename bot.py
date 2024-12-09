@@ -2,9 +2,10 @@
 # Script para enviar mortes de jogadores
 
 import logging
+import json
 from datetime import datetime, timedelta
 from calendar import monthrange
-from os import getenv, environ
+from os import getenv, environ, path
 import time
 from io import BytesIO
 from dotenv import load_dotenv
@@ -29,12 +30,16 @@ logger = logging.getLogger(__name__)
 
 GUILDSCHANNELS = getenv('GUILDSCHANNELS').split(';')
 TOKEN = getenv('DISCORDTOKEN')
+SCREENSHOT_CHANNEL = getenv('SCREENSHOT_CHANNEL')
 INTERVAL_SEARCH_DEAD = 30  # SECONDS
 INTERVAL_LAST_DEATH = 240
 INTERVAL_SEARCH_BANS = 30
 INTERVAL_BANS = 600
 MIN_LEVEL = 850
 MIN_LEVEL_BANS = 1
+PATH_SAVEIMAGES = "/GALLERY"
+PATH_THUMBNAILS = path.join(PATH_SAVEIMAGES, "thumbnails/")
+IMAGES_JSON = path.join(PATH_SAVEIMAGES, "images.json")
 
 
 def convert_date(value):
@@ -50,6 +55,43 @@ def convert_date(value):
     _, d2 = monthrange(d1.year, d1.month)
     d2 = d1.replace(day=d2)
     return (d1, d2)
+
+def save_image_info_json(message, attach, path_image, timestamp):
+    """Insere a nova imagem no arquivo json para consultas futuras"""
+    data = {
+        "path": path_image,
+        "description": message.content,
+        "author": message.author.name,
+        "date": timestamp,
+        "thumbnail": path.join(PATH_THUMBNAILS, path_image)
+    }
+    if not path.exists(IMAGES_JSON):
+        logger.debug(f"Arquivo {IMAGES_JSON} não existe, criando...")
+        new_data = {"images": []}
+        with open(IMAGES_JSON, 'w') as f:
+            json.dump(new_data, f)
+
+    json_str = json.dumps(data)
+    logger.debug(f"Salvando json {json_str}")
+    with open(IMAGES_JSON, 'r') as f:
+        json_images = json.load(f)
+
+    json_images['images'].append(data)
+
+    with open(IMAGES_JSON, 'w') as f:
+        json.dump(json_images, f)
+
+async def save_image(message):
+    """Percorre todos anexos [jpg, jpeg, png] e salva"""
+    attachments = message.attachments
+
+    for attach in attachments:
+        if attach.filename.endswith(('jpg', 'png', 'jpeg')):
+            timestamp = datetime.now().timestamp()
+            path_image = path.join(PATH_SAVEIMAGES, f'{timestamp}.png')
+            logger.debug(f"Salvando no diretório: {path_image}")
+            await attach.save(path_image)
+            save_image_info_json(message, attach, path_image, timestamp)
 
 
 class DeathCog(commands.Cog):
@@ -195,6 +237,11 @@ class Bot(commands.Bot):
     async def on_ready(self):
         await self.add_cog(DeathCog(self), override=True)
 
+
+    async def on_message(self, message):
+        if str(message.channel.id) in SCREENSHOT_CHANNEL and message.attachments:
+            logger.debug(f"Salvando imagens: {[m.filename for m in message.attachments]} channel: {message.channel} Usuário: {message.author.name} texto: {message.content}")
+            await save_image(message)
 
 intents = discord.Intents.all()
 intents.message_content = True
