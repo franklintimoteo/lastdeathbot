@@ -1,0 +1,10 @@
+services:
+  lastdeathbot:
+    build: .
+    volumes:
+      - /DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite:rw
+      - /GALLERY:/GALLERY:rw
+      - /DATA/configs/lastdeathbot/ssh_config:/root/.ssh/config:ro
+      - /DATA/configs/lastdeathbot/ovh_remote:/root/.ssh/ovh_remote:ro
+      - /DATA/configs/lastdeathbot/.env:/lastdeath/.env:ro
+    restart: unless-stopped
