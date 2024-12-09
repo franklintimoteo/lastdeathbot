@@ -45,11 +45,11 @@ RUN mkdir /root/.ssh
 #  - database: vincula o database presente do host para dentro do container
 #  - .env: variaveis secretas de ambiente
 #  - ssh_config: vincula o arquivo de ssh_config para não vazar os dados da vps que hospeda o site
-VOLUME ["/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite",
-	"/DATA/configs/lastdeathbot/.env:/lastdeath/.env",
-	"/DATA/configs/lastdeathbot/ssh_config:/root/.ssh/config",
-	"/DATA/configs/lastdeathbot/ovh_remote:/root/.ssh/ovh_remote",
-	"/GALLERY:/GALLERY"]
+# VOLUME ["/DATA/configs/lastdeathbot/deaths-database.sqlite:/lastdeath/deaths-database.sqlite",
+# 	"/DATA/configs/lastdeathbot/.env:/lastdeath/.env",
+# 	"/DATA/configs/lastdeathbot/ssh_config:/root/.ssh/config",
+# 	"/DATA/configs/lastdeathbot/ovh_remote:/root/.ssh/ovh_remote",
+# 	"/GALLERY:/GALLERY"]
 
 # explicita qual arquivo inicializar após o container subir
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
